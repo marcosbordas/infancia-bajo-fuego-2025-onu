@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infancia bajo fuego | Niños y conflictos armados 2025</title>
+  <meta name="description" content="Dashboard interactivo sobre reclutamiento infantil y violaciones graves contra niños y niñas en conflictos armados, 2025. Datos oficiales de la ONU.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="leaflet.css">
+  <style>
+    :root {
+      --bg: #060a12;
+      --bg-2: #0a111d;
+      --panel: #0d1626;
+      --panel-2: #111d31;
+      --text: #f5f7fb;
+      --muted: #93a1b8;
+      --line: rgba(255, 255, 255, 0.09);
+      --red: #ff3b30;
+      --red-deep: #d91e18;
+      --orange: #ff8a1f;
+      --amber: #ffb020;
+      --gray: #7b8794;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 8%, rgba(255, 59, 48, 0.12), transparent 32%),
+        radial-gradient(circle at 86% 24%, rgba(255, 138, 31, 0.08), transparent 34%),
+        radial-gradient(circle at 50% 105%, rgba(30, 64, 175, 0.12), transparent 46%);
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .site-header,
+    main {
+      position: relative;
+      z-index: 1;
+    }
+
+    .site-header {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 22px 28px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+    }
+
+    .brand-mark {
+      width: 13px;
+      height: 13px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow:
+        0 0 0 5px rgba(255, 59, 48, 0.15),
+        0 0 24px rgba(255, 59, 48, 0.8);
+    }
+
+    .brand-text {
+      color: #dfe6f2;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      color: #c8d2e2;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .header-year {
+      color: var(--orange);
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .hero {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 18px 28px 26px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .hero-copy {
+      max-width: 980px;
+    }
+
+    .eyebrow {
+      margin-bottom: 12px;
+      color: var(--orange);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      max-width: 1050px;
+      margin: 0 0 16px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(34px, 4.4vw, 68px);
+      font-weight: 700;
+      line-height: 0.98;
+      letter-spacing: -0.045em;
+    }
+
+    .hero-sub {
+      max-width: 740px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(14px, 1.2vw, 17px);
+      line-height: 1.6;
+    }
+
+    .hero-badge {
+      flex: 0 0 auto;
+      min-width: 190px;
+      padding: 18px 20px;
+      border: 1px solid rgba(255, 138, 31, 0.22);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(255, 59, 48, 0.13), rgba(255, 138, 31, 0.06));
+      box-shadow: var(--shadow);
+    }
+
+    .hero-badge-label {
+      display: block;
+      margin-bottom: 6px;
+      color: #ffb4a8;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .hero-badge-value {
+      display: block;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .hero-badge-caption {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .global-strip {
+      margin-bottom: 22px;
+      border-top: 1px solid rgba(255, 59, 48, 0.22);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(90deg, rgba(255, 59, 48, 0.14), rgba(255, 138, 31, 0.05) 45%, rgba(255, 255, 255, 0.02));
+    }
+
+    .global-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 18px 28px;
+      display: grid;
+      grid-template-columns: auto auto 1fr;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .global-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .global-number {
+      color: #fff;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(34px, 4vw, 58px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .global-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .global-divider {
+      width: 1px;
+      height: 58px;
+      background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    }
+
+    .global-message {
+      padding-left: 18px;
+      border-left: 2px solid var(--red);
+      color: #c8d2e2;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .global-message strong {
+      display: block;
+      margin-bottom: 2px;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .dashboard {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 28px 28px;
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .map-card {
+      position: relative;
+      height: clamp(620px, 72vh, 860px);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #0f2238;
+      box-shadow: var(--shadow);
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+      background: #0f2238;
+    }
+
+    .map-head {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 500;
+      max-width: 300px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      background: rgba(6, 10, 18, 0.78);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+      pointer-events: none;
+    }
+
+    .map-eyebrow {
+      margin-bottom: 4px;
+      color: var(--orange);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .map-title {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .map-sub {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .map-legend {
+      position: absolute;
+      left: 20px;
+      bottom: 20px;
+      z-index: 500;
+      width: 172px;
+      padding: 14px 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      background: rgba(6, 10, 18, 0.82);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+    }
+
+    .legend-title {
+      margin-bottom: 10px;
+      color: #c8d2e2;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 8px 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      flex: 0 0 auto;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      background: var(--color);
+      box-shadow: 0 0 10px var(--color);
+    }
+
+    .legend-note {
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: #7f8da2;
+      font-size: 9px;
+      line-height: 1.4;
+    }
+
+    .map-reset {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 500;
+      padding: 9px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      background: rgba(6, 10, 18, 0.78);
+      color: #fff;
+      font: 600 10px/1 "Inter", sans-serif;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .map-reset:hover {
+      border-color: rgba(255, 138, 31, 0.5);
+      background: rgba(255, 59, 48, 0.18);
+    }
+
+    .map-count {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      z-index: 500;
+      padding: 8px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      background: rgba(6, 10, 18, 0.7);
+      color: #c8d2e2;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transform: translateX(-50%);
+      backdrop-filter: blur(10px);
+    }
+
+    .panel {
+      height: clamp(620px, 72vh, 860px);
+      overflow-y: auto;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(17, 29, 49, 0.96), rgba(8, 14, 24, 0.98));
+      box-shadow: var(--shadow);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+    }
+
+    .panel-empty {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .panel-empty h2 {
+      margin: 0 0 10px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(30px, 3vw, 44px);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .panel-empty p {
+      max-width: 520px;
+      margin: 0 0 26px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .top-list-wrap {
+      margin-top: auto;
+    }
+
+    .top-list-title {
+      margin-bottom: 10px;
+      color: #c8d2e2;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .top-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .top-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      overflow: hidden;
+      padding: 12px 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.025);
+      color: #fff;
+      font-family: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .top-item:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 138, 31, 0.45);
+      background: rgba(255, 138, 31, 0.07);
+    }
+
+    .top-rank {
+      color: var(--orange);
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .top-name {
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .top-value {
+      color: #fff;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .top-bar {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: calc(var(--w) * 1%);
+      height: 2px;
+      background: linear-gradient(90deg, var(--orange), var(--red));
+      opacity: 0.8;
+    }
+
+    .panel-hint {
+      margin-top: 18px;
+      color: #6f7f96;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .panel-content {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .panel-content.fade-in {
+      animation: panelFade 0.38s ease both;
+    }
+
+    @keyframes panelFade {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .country-head {
+      margin-bottom: 22px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .country-head h2 {
+      margin: 0 0 8px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(30px, 3vw, 46px);
+      line-height: 1.02;
+      letter-spacing: -0.045em;
+    }
+
+    .country-subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .metric-block {
+      margin-bottom: 22px;
+    }
+
+    .metric-label {
+      margin-bottom: 6px;
+      color: #c8d2e2;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      color: #fff;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(54px, 6vw, 86px);
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -0.06em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric-value.empty {
+      color: #ffb4a8;
+      font-family: "Inter", sans-serif;
+      font-size: clamp(22px, 2.2vw, 30px);
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .children-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.035);
+      color: #c8d2e2;
+      font-size: 11px;
+    }
+
+    .children-chip::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 8px var(--orange);
+    }
+
+    .recruitment-box {
+      margin-bottom: 20px;
+      padding: 18px;
+      border: 1px solid rgba(255, 138, 31, 0.24);
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255, 138, 31, 0.11), rgba(255, 59, 48, 0.05));
+    }
+
+    .recruitment-label {
+      margin-bottom: 6px;
+      color: #ffc08a;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .recruitment-value {
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+
+    .context {
+      margin: 0 0 18px;
+      color: #b9c5d8;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .country-note {
+      margin-bottom: 18px;
+      padding-left: 10px;
+      border-left: 2px solid var(--red);
+      color: #ffb4a8;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .panel-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: #6f7f96;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .back-button {
+      flex: 0 0 auto;
+      padding: 8px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: transparent;
+      color: #c8d2e2;
+      font: 600 9px/1 "Inter", sans-serif;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .back-button:hover {
+      border-color: rgba(255, 138, 31, 0.5);
+      color: #fff;
+    }
+
+    .site-footer {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 10px 28px 40px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .footer-main {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .footer-label {
+      margin-bottom: 6px;
+      color: #c8d2e2;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .site-footer p {
+      max-width: 980px;
+      margin: 0;
+    }
+
+    .site-footer a {
+      color: #ffb08a;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 176, 138, 0.3);
+    }
+
+    .site-footer a:hover {
+      color: #fff;
+      border-bottom-color: #fff;
+    }
+
+    .footer-links {
+      display: flex;
+      flex: 0 0 auto;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .method {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .method summary {
+      color: #c8d2e2;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .method p {
+      max-width: 1100px;
+      margin: 10px 0 0;
+      color: #7f8da3;
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 18px;
+      color: #5f6d82;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .leaflet-control-zoom a {
+      border-color: rgba(255, 255, 255, 0.12) !important;
+      background: #0d1626 !important;
+      color: #fff !important;
+    }
+
+    .leaflet-control-zoom a:hover {
+      background: #16243b !important;
+    }
+
+    .leaflet-control-attribution {
+      background: rgba(6, 10, 18, 0.7) !important;
+      color: #8d9bb0 !important;
+      font-size: 9px !important;
+    }
+
+    .leaflet-control-attribution a {
+      color: #c8d2e2 !important;
+    }
+
+    .leaflet-tooltip.map-tooltip {
+      padding: 8px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px;
+      background: rgba(6, 10, 18, 0.96);
+      color: #fff;
+      font-family: "Inter", sans-serif;
+      font-size: 12px;
+      line-height: 1.35;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .leaflet-tooltip.map-tooltip strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .leaflet-tooltip.map-tooltip span {
+      color: #9eacc2;
+      font-size: 11px;
+    }
+
+    .leaflet-tooltip-top.map-tooltip::before {
+      border-top-color: rgba(6, 10, 18, 0.96);
+    }
+
+    .leaflet-tooltip-bottom.map-tooltip::before {
+      border-bottom-color: rgba(6, 10, 18, 0.96);
+    }
+
+    .leaflet-tooltip-left.map-tooltip::before {
+      border-left-color: rgba(6, 10, 18, 0.96);
+    }
+
+    .leaflet-tooltip-right.map-tooltip::before {
+      border-right-color: rgba(6, 10, 18, 0.96);
+    }
+
+    .bubble-marker {
+      filter: drop-shadow(0 0 7px rgba(255, 80, 30, 0.7));
+      transition: filter 0.2s ease;
+    }
+
+    .bubble-marker:hover {
+      filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.85));
+    }
+
+    .bubble-marker.selected {
+      filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.95));
+    }
+
+    noscript {
+      display: block;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid rgba(255, 59, 48, 0.3);
+      border-radius: 14px;
+      background: rgba(255, 59, 48, 0.08);
+      color: #ffb4a8;
+      text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .map-card {
+        height: 62vh;
+        min-height: 520px;
+      }
+
+      .panel {
+        height: auto;
+        min-height: 0;
+      }
+
+      .hero {
+        align-items: flex-start;
+      }
+
+      .hero-badge {
+        display: none;
+      }
+
+      .global-inner {
+        grid-template-columns: auto auto;
+      }
+
+      .global-message {
+        grid-column: 1 / -1;
+        padding-top: 14px;
+        padding-left: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-left: 0;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .site-header,
+      .hero,
+      .global-inner,
+      .dashboard,
+      .site-footer {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .hero {
+        padding-top: 10px;
+      }
+
+      .hero h1 {
+        font-size: clamp(32px, 10vw, 46px);
+      }
+
+      .global-inner {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .global-divider {
+        display: none;
+      }
+
+      .global-number {
+        font-size: 42px;
+      }
+
+      .map-card {
+        height: 56vh;
+        min-height: 460px;
+      }
+
+      .map-head {
+        top: 12px;
+        right: 72px;
+        left: 12px;
+        padding: 10px 12px;
+      }
+
+      .map-title {
+        font-size: 13px;
+      }
+
+      .map-sub {
+        font-size: 10px;
+      }
+
+      .map-legend {
+        bottom: 12px;
+        left: 12px;
+        width: 150px;
+        padding: 10px 12px;
+      }
+
+      .map-count {
+        display: none;
+      }
+
+      .map-reset {
+        top: 12px;
+        right: 12px;
+        padding: 8px 11px;
+      }
+
+      .panel {
+        padding: 22px;
+      }
+
+      .panel-footer,
+      .footer-main,
+      .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .footer-links {
+        align-items: flex-start;
+      }
+
+      .top-item {
+        grid-template-columns: 20px 1fr auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Infancia bajo fuego</span>
+    </div>
+    <div class="header-meta">
+      <span class="pill">Datos verificados ONU</span>
+      <span class="header-year">2025</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Dashboard interactivo · Reclutamiento infantil y conflictos armados</div>
+        <h1>La guerra también se libra contra la infancia.</h1>
+        <p class="hero-sub">Reclutamiento y violaciones graves contra niños y niñas en conflictos armados. Explora el mapa para ver qué ocurrió en cada país durante 2025.</p>
+      </div>
+      <div class="hero-badge" aria-label="Récord desde 1996">
+        <span class="hero-badge-label">Récord desde 1996</span>
+        <span class="hero-badge-value">Máximo</span>
+        <span class="hero-badge-caption">histórico de niños afectados</span>
+      </div>
+    </section>
+
+    <section class="global-strip" aria-label="Cifra global">
+      <div class="global-inner">
+        <div class="global-stat">
+          <span class="global-number" data-count="38558">38.558</span>
+          <span class="global-label">violaciones graves verificadas</span>
+        </div>
+        <div class="global-divider" aria-hidden="true"></div>
+        <div class="global-stat">
+          <span class="global-number" data-count="24174">24.174</span>
+          <span class="global-label">niños y niñas afectados</span>
+        </div>
+        <div class="global-message">
+          <strong>La cifra más alta desde 1996.</strong>
+          <span>En 2025, la ONU verificó 38.558 violaciones graves contra 24.174 niños y niñas en conflictos armados.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard">
+      <div class="map-card">
+        <div id="map" aria-label="Mapa mundial de violaciones graves contra niños y niñas"></div>
+        <div class="map-head">
+          <div class="map-eyebrow">Mapa plano mundial</div>
+          <div class="map-title">Violaciones graves verificadas</div>
+          <div class="map-sub">Tamaño y color según el total por país · 2025</div>
+        </div>
+        <div class="map-legend" aria-label="Leyenda del mapa">
+          <div class="legend-title">Total por país</div>
+          <div class="legend-row"><span class="legend-dot" style="--size:7px;--color:#ffc400"></span><span>Menos de 500</span></div>
+          <div class="legend-row"><span class="legend-dot" style="--size:11px;--color:#ff8a00"></span><span>500 – 1.999</span></div>
+          <div class="legend-row"><span class="legend-dot" style="--size:15px;--color:#ff5a00"></span><span>2.000 – 4.999</span></div>
+          <div class="legend-row"><span class="legend-dot" style="--size:20px;--color:#ff1f1f"></span><span>5.000 o más</span></div>
+          <div class="legend-row"><span class="legend-dot" style="--size:7px;--color:#9aa7b8"></span><span>Sin cifra verificada</span></div>
+          <div class="legend-note">Haz zoom para separar burbujas en zonas densas.<br>Los países sin burbuja no tienen violaciones documentadas.</div>
+        </div>
+        <button class="map-reset" id="reset-view" type="button">Ver mundo</button>
+        <div class="map-count" id="map-count">24 países y situaciones</div>
+      </div>
+
+      <aside class="panel" aria-live="polite">
+        <div class="panel-empty" id="panel-empty">
+          <div class="eyebrow">Panel de información</div>
+          <h2>Explora el mapa</h2>
+          <p>Haz clic en una burbuja para ver el total de violaciones graves, el dato de reclutamiento y un contexto breve de cada país.</p>
+          <div class="top-list-wrap">
+            <div class="top-list-title">Países con más violaciones verificadas</div>
+            <div class="top-list" id="top-list"></div>
+          </div>
+          <div class="panel-hint">También puedes pasar el ratón sobre las burbujas para ver el nombre del país.</div>
+        </div>
+
+        <div class="panel-content" id="panel-content" hidden>
+          <div class="country-head">
+            <div class="eyebrow" id="country-eyebrow">País seleccionado</div>
+            <h2 id="country-name">—</h2>
+            <div class="country-subtitle" id="country-subtitle"></div>
+          </div>
+
+          <div class="metric-block">
+            <div class="metric-label">Violaciones graves verificadas</div>
+            <div class="metric-value" id="country-violations">—</div>
+            <div class="children-chip" id="country-children"></div>
+          </div>
+
+          <div class="recruitment-box">
+            <div class="recruitment-label">Reclutamiento y uso</div>
+            <div class="recruitment-value" id="country-recruitment">—</div>
+          </div>
+
+          <p class="context" id="country-context"></p>
+          <div class="country-note" id="country-note"></div>
+
+          <div class="panel-footer">
+            <span>Fuente: Informe anual del Secretario General sobre niños y conflictos armados (datos 2025).</span>
+            <button class="back-button" id="back-to-overview" type="button">Ver ranking</button>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-main">
+        <div>
+          <div class="footer-label">Fuente oficial</div>
+          <p>Datos: <a href="https://childrenandarmedconflict.un.org/sites/default/files/2026-06/S_2026_357_UNEDITED.pdf" target="_blank" rel="noopener noreferrer">Informe anual del Secretario General sobre niños y conflictos armados (A/80/723-S/2026/357)</a>, Naciones Unidas, 2026. Cubre enero–diciembre de 2025.</p>
+        </div>
+        <div class="footer-links">
+          <a href="https://childrenandarmedconflict.un.org/" target="_blank" rel="noopener noreferrer">Sitio oficial de Children and Armed Conflict</a>
+          <span>Datos verificados por la ONU</span>
+        </div>
+      </div>
+      <details class="method">
+        <summary>Nota metodológica</summary>
+        <p>Solo se incluyen violaciones verificadas por la ONU. Las cifras no representan la escala total del daño. La suma de las 23 cifras por país coincide con las 38.558 violaciones graves verificadas. La sección regional Cuenca del Lago Chad (2.959 violaciones; 1.708 niños) se desglosa en Camerún, Chad, Níger y Nigeria; para evitar duplicados, el mapa usa las cifras por país. Chad solo dispone de la cifra de Lac (60) y no de un total nacional. Irán aparece como “sin violaciones documentadas” porque el informe solo recoge reportes no verificados. La suma de niños afectados por país no incluye a Chad porque el informe no desglosa esa cifra.</p>
+      </details>
+      <div class="footer-bottom">
+        <span>Dashboard interactivo · 2025</span>
+        <span>No se han estimado ni imputado cifras ausentes.</span>
+      </div>
+    </footer>
+  </main>
+
+  <noscript>Este dashboard necesita JavaScript para mostrar el mapa interactivo.</noscript>
+
+  <script src="leaflet.js"></script>
+  <script src="world.js"></script>
+  <script>
+    const PAISES = [
+      {
+        id: "afganistan",
+        nombre: "Afganistán",
+        lat: 33.9391,
+        lng: 67.7100,
+        violaciones: 1070,
+        ninos: 600,
+        reclutamiento: "204 niños (62 en combate, 142 en apoyo) por los talibanes.",
+        contexto: "La ONU verificó 1.070 violaciones graves contra 600 niños y niñas. El reclutamiento y uso de 204 niños por los talibanes, junto con los ataques a escuelas y hospitales y la denegación de acceso humanitario, configuran uno de los contextos más graves del informe.",
+        nota: ""
+      },
+      {
+        id: "republica-centroafricana",
+        nombre: "República Centroafricana",
+        lat: 6.6111,
+        lng: 20.9394,
+        violaciones: 587,
+        ninos: 389,
+        reclutamiento: "234 niños (189 niños, 45 niñas) por grupos armados y fuerzas gubernamentales; 65 en roles de combate.",
+        contexto: "Se verificaron 587 violaciones graves contra 389 niños y niñas. Un total de 234 niños fueron reclutados y usados por grupos armados, mientras que 114 niñas sufrieron violencia sexual y 133 niños fueron secuestrados.",
+        nota: ""
+      },
+      {
+        id: "colombia",
+        nombre: "Colombia",
+        lat: 4.5709,
+        lng: -74.2973,
+        violaciones: 575,
+        ninos: 449,
+        reclutamiento: "371 niños (228 niños, 139 niñas, 4 sin dato) por disidencias de las FARC-EP, el ELN y el Clan del Golfo.",
+        contexto: "La ONU documentó 575 violaciones graves contra 449 niños y niñas, incluidos 171 niños indígenas, 29 afrodescendientes y 27 venezolanos. El reclutamiento y uso de 371 niños por disidencias de las FARC-EP, el ELN y el Clan del Golfo fue la violación más verificada.",
+        nota: ""
+      },
+      {
+        id: "rd-congo",
+        nombre: "República Democrática del Congo",
+        lat: -4.0383,
+        lng: 21.7587,
+        violaciones: 4114,
+        ninos: 3263,
+        reclutamiento: "1.397 niños (1.109 niños, 288 niñas) por el M23, CODECO, las ADF y otros grupos armados.",
+        contexto: "La República Democrática del Congo registró 4.114 violaciones graves contra 3.263 niños y niñas, la segunda cifra más alta del informe. Un total de 1.397 niños fueron reclutados y usados por grupos armados como el M23, CODECO y las ADF.",
+        nota: ""
+      },
+      {
+        id: "haiti",
+        nombre: "Haití",
+        lat: 18.9712,
+        lng: -72.2852,
+        violaciones: 2088,
+        ninos: 1661,
+        reclutamiento: "892 niños (751 niños, 101 niñas, 40 sin dato) por bandas armadas y grupos de autodefensa.",
+        contexto: "Se verificaron 2.088 violaciones graves contra 1.661 niños y niñas. Las bandas armadas reclutaron y usaron a 892 niños, en un contexto de violencia extrema, secuestros y ataques a escuelas.",
+        nota: ""
+      },
+      {
+        id: "israel-palestina",
+        nombre: "Israel y Estado de Palestina",
+        lat: 31.5000,
+        lng: 35.0000,
+        violaciones: 12445,
+        ninos: 5663,
+        reclutamiento: "2 niños palestinos usados como escudos humanos (1 niño, 1 niña) por fuerzas israelíes.",
+        contexto: "El informe verificó 12.445 violaciones graves contra 5.663 niños y niñas, la cifra más alta por país. La mayoría de las víctimas fueron niños palestinos en Gaza y Cisjordania; también se documentó el uso de dos niños palestinos como escudos humanos por fuerzas israelíes.",
+        nota: "La cifra de 12.445 es conjunta para Israel y el Territorio Palestino Ocupado; el informe no la separa en dos totales."
+      },
+      {
+        id: "iran",
+        nombre: "Irán",
+        lat: 32.4279,
+        lng: 53.6880,
+        violaciones: null,
+        ninos: null,
+        reclutamiento: "Sin dato verificado.",
+        contexto: "El informe menciona reportes no verificados de 29 niños muertos y un niño mutilado durante la escalada militar entre Israel e Irán en junio de 2025. La ONU no verificó esas cifras, por lo que no se contabilizan como violaciones documentadas.",
+        nota: "El informe solo recoge reportes no verificados; no se contabilizan como violaciones documentadas."
+      },
+      {
+        id: "libano",
+        nombre: "Líbano",
+        lat: 33.8547,
+        lng: 35.8623,
+        violaciones: 294,
+        ninos: 281,
+        reclutamiento: "132 niños por grupos armados palestinos, Hizbulá y otros actores; la mayoría en roles de apoyo.",
+        contexto: "Se verificaron 294 violaciones graves contra 281 niños y niñas. El reclutamiento y uso de 132 niños por grupos armados palestinos y Hizbulá se sumó a los ataques y al desplazamiento.",
+        nota: ""
+      },
+      {
+        id: "libia",
+        nombre: "Libia",
+        lat: 26.3351,
+        lng: 17.2283,
+        violaciones: 1140,
+        ninos: 56,
+        reclutamiento: "17 niños por grupos armados y fuerzas de seguridad, incluidos el Ejército Nacional Libio y la Policía Judicial.",
+        contexto: "La ONU verificó 1.140 violaciones graves contra 56 niños y niñas, muchas de ellas por denegación de acceso humanitario. El reclutamiento y uso de 17 niños fue atribuido a grupos armados y fuerzas de seguridad.",
+        nota: ""
+      },
+      {
+        id: "mali",
+        nombre: "Malí",
+        lat: 17.5707,
+        lng: -3.9962,
+        violaciones: 859,
+        ninos: 701,
+        reclutamiento: "353 niños (339 niños, 14 niñas) por JNIM, CMA/FLA y otros grupos armados.",
+        contexto: "Se documentaron 859 violaciones graves contra 701 niños y niñas. El reclutamiento y uso de 353 niños por JNIM, CMA/FLA y otros grupos armados fue la violación más verificada, en medio de ataques a escuelas y desplazamiento.",
+        nota: ""
+      },
+      {
+        id: "myanmar",
+        nombre: "Myanmar",
+        lat: 21.9162,
+        lng: 95.9560,
+        violaciones: 2203,
+        ninos: 1746,
+        reclutamiento: "284 niños (260 niños, 14 niñas, 10 sin dato) por el Ejército, fuerzas afiliadas y grupos armados.",
+        contexto: "La ONU verificó 2.203 violaciones graves contra 1.746 niños y niñas. El Ejército y grupos armados reclutaron y usaron a 284 niños; los ataques aéreos, el uso de explosivos y los ataques a escuelas y hospitales causaron un daño masivo.",
+        nota: ""
+      },
+      {
+        id: "somalia",
+        nombre: "Somalia",
+        lat: 5.1521,
+        lng: 46.1996,
+        violaciones: 2195,
+        ninos: 1703,
+        reclutamiento: "701 niños (679 niños, 22 niñas); Al-Shabaab reclutó y usó a 560.",
+        contexto: "Se verificaron 2.195 violaciones graves contra 1.703 niños y niñas. Al-Shabaab reclutó y usó a 560 de los 701 niños documentados, mediante secuestros, indoctrinación e incentivos económicos.",
+        nota: ""
+      },
+      {
+        id: "sudan-del-sur",
+        nombre: "Sudán del Sur",
+        lat: 6.8770,
+        lng: 31.3070,
+        violaciones: 555,
+        ninos: 383,
+        reclutamiento: "147 niños (136 niños, 11 niñas) por las fuerzas de seguridad y grupos armados.",
+        contexto: "La ONU documentó 555 violaciones graves contra 383 niños y niñas. Las fuerzas de seguridad y grupos armados reclutaron y usaron a 147 niños, mientras que la violencia sexual, los secuestros y los ataques a escuelas agravaron la crisis.",
+        nota: ""
+      },
+      {
+        id: "sudan",
+        nombre: "Sudán",
+        lat: 12.8628,
+        lng: 30.2176,
+        violaciones: 1889,
+        ninos: 1681,
+        reclutamiento: "63 niños por las Fuerzas Armadas Sudanesas, las RSF y milicias afiliadas.",
+        contexto: "Se verificaron 1.889 violaciones graves contra 1.681 niños y niñas. El conflicto entre las Fuerzas Armadas Sudanesas y las RSF dejó 63 niños reclutados y usados, además de detenciones, desplazamiento y ataques a escuelas.",
+        nota: ""
+      },
+      {
+        id: "siria",
+        nombre: "Siria",
+        lat: 34.8021,
+        lng: 38.9968,
+        violaciones: 1374,
+        ninos: 1281,
+        reclutamiento: "254 niños (237 niños, 17 niñas) por las Fuerzas Democráticas Sirias, el Gobierno y otros grupos armados.",
+        contexto: "La ONU verificó 1.374 violaciones graves contra 1.281 niños y niñas. Las Fuerzas Democráticas Sirias, el Gobierno y otros grupos reclutaron y usaron a 254 niños, en un contexto de ataques y uso de explosivos en zonas pobladas.",
+        nota: ""
+      },
+      {
+        id: "ucrania",
+        nombre: "Ucrania",
+        lat: 48.3794,
+        lng: 31.1656,
+        violaciones: 1899,
+        ninos: 781,
+        reclutamiento: "24 niños usados como informantes (22 niños, 2 niñas) por fuerzas rusas y actores no identificados.",
+        contexto: "Se documentaron 1.899 violaciones graves contra 781 niños y niñas. La ONU verificó el uso de 24 niños como informantes por fuerzas rusas y actores no identificados, además de ataques con explosivos y drones.",
+        nota: ""
+      },
+      {
+        id: "yemen",
+        nombre: "Yemen",
+        lat: 15.5527,
+        lng: 48.5164,
+        violaciones: 742,
+        ninos: 652,
+        reclutamiento: "262 niños (259 niños, 3 niñas) por las Fuerzas Armadas de Yemen, grupos afiliados y los hutíes.",
+        contexto: "La ONU verificó 742 violaciones graves contra 652 niños y niñas. Las Fuerzas Armadas de Yemen, grupos afiliados y los hutíes reclutaron y usaron a 262 niños; los ataques a escuelas y hospitales y el uso de explosivos agravaron la crisis.",
+        nota: ""
+      },
+      {
+        id: "burkina-faso",
+        nombre: "Burkina Faso",
+        lat: 12.2383,
+        lng: -1.5616,
+        violaciones: 487,
+        ninos: 455,
+        reclutamiento: "18 niños (7 niños, 11 sin dato) por grupos yihadistas y actores no identificados.",
+        contexto: "Se verificaron al menos 487 violaciones graves contra 455 niños y niñas. El reclutamiento y uso de 18 niños por grupos yihadistas y actores no identificados se sumó a una violencia extrema: 323 niños fueron asesinados o mutilados.",
+        nota: ""
+      },
+      {
+        id: "camerun",
+        nombre: "Camerún",
+        lat: 7.3697,
+        lng: 12.3547,
+        violaciones: 274,
+        ninos: 178,
+        reclutamiento: "22 niños (19 niños, 3 niñas), incluidos 15 por las Fuerzas Armadas de Camerún.",
+        contexto: "La ONU documentó 274 violaciones graves contra 178 niños y niñas. El reclutamiento y uso de 22 niños, incluidos 15 por las Fuerzas Armadas de Camerún, fue verificado en un contexto de ataques de JAS e ISWAP.",
+        nota: ""
+      },
+      {
+        id: "etiopia",
+        nombre: "Etiopía",
+        lat: 9.1450,
+        lng: 40.4897,
+        violaciones: 130,
+        ninos: 72,
+        reclutamiento: "Sin cifra desglosada en el informe.",
+        contexto: "Se verificaron 130 violaciones graves contra 72 niños y niñas, principalmente asesinatos, mutilaciones, violencia sexual y ataques a escuelas. El informe no presenta una cifra desglosada de reclutamiento y uso.",
+        nota: "El informe no presenta una cifra desglosada de reclutamiento y uso."
+      },
+      {
+        id: "mozambique",
+        nombre: "Mozambique",
+        lat: -18.6657,
+        lng: 35.5296,
+        violaciones: 552,
+        ninos: 355,
+        reclutamiento: "175 niños (105 niños, 67 niñas, 3 sin dato) por grupos armados no estatales.",
+        contexto: "La ONU documentó 552 violaciones graves contra 355 niños y niñas en Cabo Delgado y Nampula. Grupos armados no estatales reclutaron y usaron a 175 niños, y los ataques y secuestros siguieron afectando a la infancia.",
+        nota: ""
+      },
+      {
+        id: "niger",
+        nombre: "Níger",
+        lat: 17.6078,
+        lng: 8.0817,
+        violaciones: 466,
+        ninos: 422,
+        reclutamiento: "95 niños (89 niños, 6 niñas) por ISSP, ISWAP y actores no identificados.",
+        contexto: "Se verificaron 466 violaciones graves contra 422 niños y niñas. El reclutamiento y uso de 95 niños por ISSP, ISWAP y actores no identificados se produjo junto a ataques con explosivos y violencia sexual.",
+        nota: ""
+      },
+      {
+        id: "nigeria",
+        nombre: "Nigeria",
+        lat: 9.0820,
+        lng: 8.6753,
+        violaciones: 2560,
+        ninos: 1342,
+        reclutamiento: "927 casos de reclutamiento y uso que involucran a 923 niños (332 niños, 591 niñas); 860 fueron reclutados mediante secuestro.",
+        contexto: "La ONU verificó 2.560 violaciones graves contra 1.342 niños y niñas. JAS, ISWAP y las fuerzas de seguridad reclutaron y usaron a 923 niños; la mayoría fueron usados para tareas domésticas y 860 fueron reclutados mediante secuestro.",
+        nota: ""
+      },
+      {
+        id: "chad",
+        nombre: "Chad",
+        lat: 15.4542,
+        lng: 18.7322,
+        violaciones: 60,
+        ninos: null,
+        reclutamiento: "Sin cifra desglosada en el informe.",
+        contexto: "El informe incluye 60 violaciones graves en la provincia de Lac, dentro de la sección regional de la cuenca del lago Chad. No ofrece un total nacional para Chad ni una cifra desglosada de reclutamiento.",
+        nota: "Cifra regional: provincia de Lac (cuenca del lago Chad). No es un total nacional."
+      }
+    ];
+
+    const formatNumber = (value) => String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const maxViolaciones = Math.max(...PAISES.map((pais) => pais.violaciones || 0));
+    const markers = {};
+    let selectedMarker = null;
+
+    function colorFor(value) {
+      if (value === null) return "#9aa7b8";
+      if (value >= 5000) return "#ff1f1f";
+      if (value >= 2000) return "#ff5a00";
+      if (value >= 500) return "#ff8a00";
+      return "#ffc400";
+    }
+
+    function radiusFor(value) {
+      if (value === null) return 6;
+      return 4 + 20 * Math.sqrt(value / maxViolaciones);
+    }
+
+    const getWorldZoom = () => (window.innerWidth <= 700 ? 1 : 2);
+
+    const map = L.map("map", {
+      zoomControl: false,
+      worldCopyJump: true,
+      minZoom: 1,
+      maxZoom: 5,
+      zoomAnimation: false,
+      zoomSnap: 1,
+      zoomDelta: 1,
+      wheelPxPerZoomLevel: 100,
+      wheelDebounceTime: 30
+    }).setView([20, 10], getWorldZoom());
+
+    L.geoJSON(window.WORLD_COUNTRIES, {
+      filter: (feature) => feature.properties.ADMIN !== "Antarctica",
+      style: {
+        color: "#7fa3cc",
+        weight: 0.7,
+        fillColor: "#2a4a70",
+        fillOpacity: 1
+      },
+      interactive: false
+    }).addTo(map);
+
+    map.attributionControl.addAttribution(
+      'Fronteras: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>'
+    );
+
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+
+    PAISES.forEach((pais) => {
+      const radius = radiusFor(pais.violaciones);
+      const marker = L.circleMarker([pais.lat, pais.lng], {
+        radius,
+        fillColor: colorFor(pais.violaciones),
+        color: "#ffffff",
+        weight: 1,
+        opacity: 0.95,
+        fillOpacity: 0.92,
+        riseOnHover: true,
+        className: "bubble-marker"
+      }).addTo(map);
+
+      const tooltipValue = pais.violaciones === null
+        ? "Sin violaciones documentadas"
+        : `${formatNumber(pais.violaciones)} violaciones graves`;
+
+      marker.bindTooltip(
+        `<strong>${pais.nombre}</strong><span>${tooltipValue}</span>`,
+        {
+          direction: "top",
+          className: "map-tooltip",
+          offset: [0, -radius],
+          opacity: 1
+        }
+      );
+
+      marker.on("click", () => seleccionarPais(pais, marker));
+      markers[pais.id] = marker;
+    });
+
+    const panelEmpty = document.getElementById("panel-empty");
+    const panelContent = document.getElementById("panel-content");
+
+    function seleccionarPais(pais, marker) {
+      if (selectedMarker && selectedMarker !== marker) {
+        selectedMarker.setStyle({ weight: 1, color: "#ffffff" });
+        const previousElement = selectedMarker.getElement();
+        if (previousElement) previousElement.classList.remove("selected");
+      }
+
+      selectedMarker = marker;
+
+      if (marker) {
+        marker.setStyle({ weight: 3, color: "#ffffff" });
+        marker.bringToFront();
+        const element = marker.getElement();
+        if (element) element.classList.add("selected");
+      }
+
+      document.getElementById("country-name").textContent = pais.nombre;
+      document.getElementById("country-eyebrow").textContent = pais.violaciones === null ? "Situación documentada" : "País seleccionado";
+
+      const subtitle = document.getElementById("country-subtitle");
+      subtitle.textContent = pais.subtitulo || "";
+      subtitle.hidden = !pais.subtitulo;
+
+      const violations = document.getElementById("country-violations");
+      violations.textContent = pais.violaciones === null ? "Sin violaciones documentadas" : formatNumber(pais.violaciones);
+      violations.classList.toggle("empty", pais.violaciones === null);
+
+      const children = document.getElementById("country-children");
+      if (pais.ninos) {
+        children.hidden = false;
+        children.textContent = `${formatNumber(pais.ninos)} niños y niñas afectados`;
+      } else {
+        children.hidden = true;
+        children.textContent = "";
+      }
+
+      document.getElementById("country-recruitment").textContent = pais.reclutamiento || "Sin cifra desglosada en el informe.";
+      document.getElementById("country-context").textContent = pais.contexto;
+
+      const note = document.getElementById("country-note");
+      if (pais.nota) {
+        note.hidden = false;
+        note.textContent = pais.nota;
+      } else {
+        note.hidden = true;
+        note.textContent = "";
+      }
+
+      panelEmpty.hidden = true;
+      panelContent.hidden = false;
+      panelContent.classList.remove("fade-in");
+      void panelContent.offsetWidth;
+      panelContent.classList.add("fade-in");
+    }
+
+    const topList = document.getElementById("top-list");
+    const topPaises = [...PAISES]
+      .filter((pais) => pais.violaciones !== null)
+      .sort((a, b) => b.violaciones - a.violaciones)
+      .slice(0, 5);
+
+    topPaises.forEach((pais, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "top-item";
+      button.dataset.id = pais.id;
+      button.innerHTML = `
+        <span class="top-rank">${String(index + 1).padStart(2, "0")}</span>
+        <span class="top-name">${pais.nombre}</span>
+        <span class="top-value">${formatNumber(pais.violaciones)}</span>
+        <span class="top-bar" style="--w:${(pais.violaciones / topPaises[0].violaciones) * 100}"></span>
+      `;
+      button.addEventListener("click", () => {
+        const marker = markers[pais.id];
+        seleccionarPais(pais, marker);
+        if (marker) {
+          map.flyTo(marker.getLatLng(), Math.max(map.getZoom(), 3), { duration: 0.35 });
+        }
+      });
+      topList.appendChild(button);
+    });
+
+    document.getElementById("reset-view").addEventListener("click", () => {
+      map.setView([20, 10], getWorldZoom(), { animate: false });
+    });
+
+    document.getElementById("back-to-overview").addEventListener("click", () => {
+      panelContent.hidden = true;
+      panelEmpty.hidden = false;
+
+      if (selectedMarker) {
+        selectedMarker.setStyle({ weight: 1, color: "#ffffff" });
+        const element = selectedMarker.getElement();
+        if (element) element.classList.remove("selected");
+        selectedMarker = null;
+      }
+
+      map.setView([20, 10], getWorldZoom(), { animate: false });
+    });
+
+    document.getElementById("map-count").textContent = `${PAISES.length} países y situaciones`;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    document.querySelectorAll("[data-count]").forEach((element) => {
+      const target = Number(element.dataset.count);
+      if (reduceMotion) {
+        element.textContent = formatNumber(target);
+        return;
+      }
+
+      const duration = 1400;
+      const start = performance.now();
+
+      function frame(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        element.textContent = formatNumber(Math.round(target * eased));
+        if (progress < 1) requestAnimationFrame(frame);
+      }
+
+      requestAnimationFrame(frame);
+      setTimeout(() => {
+        element.textContent = formatNumber(target);
+      }, duration + 120);
+    });
+
+    let lastMobile = window.innerWidth <= 700;
+
+    window.addEventListener("resize", () => {
+      map.invalidateSize();
+      const nowMobile = window.innerWidth <= 700;
+      if (nowMobile !== lastMobile) {
+        lastMobile = nowMobile;
+        map.setView([20, 10], getWorldZoom(), { animate: false });
+      }
+    });
+  </script>
+</body>
+</html>
